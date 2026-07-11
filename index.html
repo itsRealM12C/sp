@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Screensaver Chooser</title>
+    <style>
+        /* ---- Sandstone-style dark theme (mimicking webOS Enact Sandstone) ---- */
+        :root {
+            --bg: #000000;
+            --panel: #1c1c1c;
+            --text: #ffffff;
+            --text-dim: #b0b0b0;
+            --accent: #ffffff;
+            --focus-glow: #ffffff;
+            --btn-bg: #2a2a2a;
+            --btn-bg-hover: #3a3a3a;
+            --btn-bg-active: #4a4a4a;
+            --exit-bg: #2a2a2a;
+            --exit-bg-hover: #6b1f1f;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "LG Smart UI", "Sandstone", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            cursor: default;
+            overflow: hidden;
+        }
+
+        .app {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---- Header (top bar with Exit button on the corner) ---- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 3rem;
+            min-height: 7rem;
+        }
+
+        header .title {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text);
+        }
+
+        .exit-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: var(--exit-bg);
+            color: var(--text);
+            border: 0;
+            cursor: pointer;
+            font-size: 2rem;
+            line-height: 1;
+            transition: background 0.15s ease, transform 0.1s ease;
+            outline: none;
+        }
+        .exit-btn:hover,
+        .exit-btn:focus-visible {
+            background: var(--exit-bg-hover);
+            box-shadow: 0 0 0 3px var(--focus-glow);
+        }
+        .exit-btn:active { transform: scale(0.94); }
+        .exit-btn svg {
+            width: 2rem;
+            height: 2rem;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        /* ---- Main button area ---- */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 3rem 5rem;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 3rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .launch-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            min-height: 22rem;
+            padding: 3rem 2rem;
+            border-radius: 1.5rem;
+            background: var(--btn-bg);
+            color: var(--text);
+            border: 0;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+            outline: none;
+            text-align: center;
+        }
+        .launch-btn:hover,
+        .launch-btn:focus-visible {
+            background: var(--btn-bg-hover);
+            box-shadow: 0 0 0 4px var(--focus-glow);
+        }
+        .launch-btn:active {
+            background: var(--btn-bg-active);
+            transform: scale(0.98);
+        }
+
+        .launch-btn .icon {
+            width: 6rem;
+            height: 6rem;
+            stroke: currentColor;
+            stroke-width: 1.6;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.95;
+        }
+
+        .launch-btn .label {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .launch-btn .sub {
+            font-size: 1.4rem;
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        @media (max-width: 720px) {
+            header { padding: 1.5rem 2rem; min-height: 5rem; }
+            header .title { font-size: 1.5rem; }
+            .exit-btn { width: 3rem; height: 3rem; font-size: 1.5rem; }
+            .exit-btn svg { width: 1.5rem; height: 1.5rem; }
+            .btn-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .launch-btn { min-height: 14rem; padding: 2rem 1.5rem; }
+            .launch-btn .icon { width: 4rem; height: 4rem; }
+            .launch-btn .label { font-size: 1.5rem; }
+            .launch-btn .sub { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="title">Screen Savers</div>
+            <button class="exit-btn" id="exitBtn" aria-label="Exit" title="Exit">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                </svg>
+            </button>
+        </header>
+
+        <main>
+            <div class="btn-grid">
+                <a class="launch-btn"
+                   href="https://itsrealm12c.github.io/sp/ScreenSaver_port%20(1).html"
+                   id="btnScreensaver">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="13" rx="1.5"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                        <circle cx="8" cy="9" r="1.4" fill="currentColor" stroke="none"></circle>
+                        <path d="M5 14 L10 10 L13 12 L17 8 L20 11"></path>
+                    </svg>
+                    <span class="label">Screen Saver</span>
+                    <span class="sub">Launch the classic screen saver</span>
+                </a>
+
+                <a class="launch-btn"
+                   href="https://itsrealm12c.github.io/sp/ClockScreenSaver_port%20(1).html"
+                   id="btnClockScreensaver">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <polyline points="12 7 12 12 16 14"></polyline>
+                    </svg>
+                    <span class="label">Clock Screen Saver</span>
+                    <span class="sub">Launch the clock screen saver</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            var exitBtn = document.getElementById('exitBtn');
+            exitBtn.addEventListener('click', function () {
+                try {
+                    // webOS / TV close pattern
+                    if (window.PalmSystem && typeof window.PalmSystem.close === 'function') {
+                        window.PalmSystem.close();
+                        return;
+                    }
+                    if (window.tizen && window.tizen.application) {
+                        window.tizen.application.getCurrentApplication().exit();
+                        return;
+                    }
+                } catch (e) { /* ignore */ }
+
+                // Browser fallback: try to close the tab/window, then go back.
+                try {
+                    window.close();
+                } catch (e) { /* ignore */ }
+
+                // If window.close() didn't work (most modern browsers block it
+                // for non-script-opened windows), fall back to history.back().
+                if (history.length > 1) {
+                    history.back();
+                } else {
+                    // Last resort: blank the page so it "looks" exited.
+                    document.body.innerHTML = '';
+                }
+            });
+
+            // Keyboard shortcuts (arrow keys + Enter, like webOS spotlight)
+            var buttons = [
+                document.getElementById('btnScreensaver'),
+                document.getElementById('btnClockScreensaver')
+            ];
+            var focusedIndex = 0;
+            buttons[0].classList.add('focused');
+
+            function setFocus(i) {
+                buttons.forEach(function (b) { b.classList.remove('focused'); });
+                buttons[i].focus();
+                buttons[i].classList.add('focused');
+                focusedIndex = i;
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    setFocus((focusedIndex + 1) % buttons.length);
+                    e.preventDefault();
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    setFocus((focusedIndex - 1 + buttons.length) % buttons.length);
+                    e.preventDefault();
+                } else if (e.key === 'Escape') {
+                    exitBtn.click();
+                    e.preventDefault();
+                }
+            });
+
+            // Initial focus for keyboard nav
+            buttons[0].setAttribute('tabindex', '0');
+            buttons[1].setAttribute('tabindex', '0');
+        })();
+    </script>
+
+    <style>
+        /* Focused-state highlight for keyboard navigation */
+        .launch-btn.focused {
+            background: var(--btn-bg-hover);
+            box-shadow: 0 0 0 4px var(--focus-glow);
+        }
+    </style>
+</body>
+</html>
